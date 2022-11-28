@@ -1,0 +1,185 @@
+<!DOCTYPE html>
+<html lang="jp">
+<!-- View部分 -->
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <!-- 開発バージョン、便利なコンソールの警告が含まれています -->
+    <script src="https://cdn.jsdelivr.net/npm/vue@2/dist/vue.js"></script>
+    <script type="text/javascript" src="https://cdnjs.cloudflare.com/ajax/libs/lodash.js/4.17.21/lodash.min.js"></script>
+</head>
+
+<body>
+    <div id="app">
+        <div>
+            <!-- v-bind:→タグ属性の値をVueインスタンス内で定義した変数で表現する場合に仕様 -->
+            <label v-bind:class="label1Class" for="input1">{{ label1 }}</label>
+            <!-- v-model:ViewとModelの双方向バインディングを行いたい場合に仕様 -->
+            <input id="input1" type="text" v-model="vModel1">
+        </div>
+        <div>
+            <!-- 「v-bind:」は「:」と省略することが可能。 -->
+            <label :class="label2Class" for="input2">{{ label2 }}</label>
+            <input id="input2" type="text" v-model="count" readonly>
+        </div>
+        <div>
+            <label for="button3">{{ label3 }}</label>
+            <!-- v-on:→イベントのトリガーと呼び出す関数を定義できる -->
+            <button id="button3" v-on:click="button3ClickEvent">表示</button> →
+            <!-- v-if→条件に応じて表示させる要素を変更する -->
+            <input v-if="vModel1==''" id="input3" type="text" value="未入力です" disabled>
+            <input v-else id="input3" type="text" v-model="vModel3" disabled>
+            <label v-if="label3a!=''" for="">{{ label3a }} になりました。</label>
+
+        </div>
+        <div>
+            <label for="input4">{{ label4 }}</label>
+            <!-- 「v-on:」は「@」と省略することが可能。 -->
+            <button id="button4" @click="button4ClickEvent">削除</button>
+        </div>
+        <div>
+            <label for="input5">{{ label5 }}</label>
+            <!-- v-for→要素数分繰り返す -->
+            <ul>
+                <li v-for="vModel4 in vModel4List">{{ vModel4 }}</li>
+            </ul>
+        </div>
+    </div>
+</body>
+<script>
+    // Modelクラスの変更検知クラス
+    class Notifier {
+        constructor() {
+            this.handlers = [];
+        }
+
+        // イベントを設定する
+        observe(handler) {
+            this.handlers.push(handler);
+        }
+
+        // 設定されたイベントの発火
+        fire() {
+            _.forEach(this.handlers, h => h());
+        }
+    }
+
+    // Model部分
+    class Model {
+
+        constructor() {
+            this.model1 = "";
+            this.model2 = "";
+            this.vModel4List = [];
+            this.model3Changed = new Notifier();
+            this.model4Changed = new Notifier();
+        }
+
+        button3Click(value) {
+            this.model3 = value;
+        }
+
+        button4Click(value) {
+            this.model3 = value;
+        }
+
+        // modelのsetter/getter
+        set model3(x) {
+            this._model3 = x;
+            this.model3Changed.fire();
+        }
+
+        get model3() {
+            return this._model3
+        }
+
+        set model4(x) {
+            this._model4 = x;
+            this.model4Changed.fire();
+        }
+
+        get model4() {
+            return this._model4
+        }
+    }
+
+    // ViewModel部分
+    var vm = new Vue({
+        el: "#app",
+        data: {
+            model: new Model(),
+            label1: "1.テキスト入力",
+            label2: "2.入力文字数",
+            label3: "3.入力した値を表示",
+            label3a: "",
+            label4: "4.入力した値を削除",
+            label5: "4.ループ",
+            label1Class: "label1-class",
+            label2Class: "label2-class",
+            vModel1: "",
+            vModel3: "",
+            vModel4List: ['A', 'B', 'C'],
+        },
+        // 算出プロパティ
+        computed: {
+            // vModel1の文字数を取得してcountに設定
+            count: vm => vm.vModel1.length
+        },
+        // メソッド定義
+        methods: {
+            button3ClickEvent: function() {
+
+                // vModel1の入力値を設定
+                this.vModel3 = this.vModel1;
+                // モデルクラスの処理を呼び出し
+                this.model.button3Click(this.vModel1)
+            },
+            button4ClickEvent: function() {
+
+                // vModelの入力値をクリア
+                this.vModel1 = "";
+                this.vModel3 = "";
+                // モデルクラスの処理を呼び出し
+                this.model.button4Click(this.vModel3)
+            },
+        },
+        // ライフサイクルフックについては以下URL参照
+        // https://v3.ja.vuejs.org/api/options-lifecycle-hooks.html#rendertracked
+        beforeCreate: function() {},
+        created: function() {},
+        beforeMount: function() {},
+        // VueインスタンスがDOM要素にマウントされた時に呼び出される
+        mounted: function() {
+            // モデルの値が変更された際の処理を記述
+            this.model.model3Changed.observe(() => {
+                this.label3a = this.model.model3;
+            })
+            this.model.model4Changed.observe(() => {
+                this.label3a = this.model.model3;
+            })
+        },
+        beforeUpdate: function() {},
+        updated: function() {},
+        activated: function() {},
+        deactivated: function() {},
+        beforeUnmount: function() {},
+        unmounted: function() {},
+        errorCaptured: function() {},
+        renderTracked: function() {},
+        renderTriggered: function() {},
+    })
+</script>
+<style>
+    .label1-class {
+        color: red;
+    }
+    
+    .label2-class {
+        color: blue;
+    }
+</style>
+
+</html>
