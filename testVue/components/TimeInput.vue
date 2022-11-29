@@ -20,18 +20,18 @@ export default class TimeInput extends Vue {
     this.dValue = v;
   }
 
-  updated() {
-    this.$emit("input", this.dValue);
-  }
-
+  // フォーカスイン時処理
   public focusEvent() {
     this.dValue = this.offColon(this.dValue);
   }
 
+  // フォーカスアウト時処理
   public blurEvent() {
-    this.checkTime(this.dValue);
-    this.dValue = this.toColon((this.$el as any).value);
-    this.$emit("input", this.dValue);
+    let val: string = (this.$el as any).value;
+    this.checkTime(val);
+    val = this.toColon(val);
+    // 親→子へ値を渡す　※emitで渡さないと親側の値は更新されない
+    this.$emit('onChange', val);
   }
 
   private checkTime(value: string) {

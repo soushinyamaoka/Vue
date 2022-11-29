@@ -2,11 +2,19 @@
   <div>
     <Header></Header>
     <div>
-      <CustomInput :pValue="count"> </CustomInput>
-      <CustomButton @click="countUpEvent()"> </CustomButton>
+      <CustomInput
+        :pValue="count"
+        @input="count = $event"
+      ></CustomInput>
+      <CustomButton
+        @click="countUpEvent()"
+      ></CustomButton>
     </div>
     <div>
-      <TimeInput :pValue="time"> </TimeInput>
+      <TimeInput
+        :pValue="time"
+        @onChange="time = $event"
+      ></TimeInput>
     </div>
     <label for="">現在のdataの値</label>
     <div>
@@ -43,11 +51,11 @@ import CustomButton from "@/components/CustomButton.vue";
   },
 })
 export default class Test001 extends Vue {
-  protected count: number = 0;
+  count: number = 0;
   protected time: string = "12:12";
 
   protected countUpEvent() {
-    this.count += 1;
+    this.count = isNaN(this.count) ? this.count : Number(this.count) + 1;
   }
 }
 </script>
